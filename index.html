@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hojiak Map</title>
+<meta name="theme-color" content="#7CC3F2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Caveat:wght@500;700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+:root{--ink:#1F2F57;--muted:#4A5470;--paper:#FFFDF7;--sea:#7CC3F2;--coral:#D23B41;--local:#F7E59A;--cafe:#DCD0F7;--global:#A9E5D3;--sweets:#F9C6CF;
+--hand:'Caveat','Kaiti SC','STKaiti','KaiTi','PingFang SC',cursive;--disp:'Baloo 2','Figtree',system-ui,sans-serif;--body:'Figtree',system-ui,-apple-system,'PingFang SC',sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;background:#E9EEF5;color:var(--ink);font-family:var(--body);-webkit-tap-highlight-color:transparent}
+button,input,textarea{font-family:inherit;color:inherit}
+button{cursor:pointer}
+.app{position:relative;max-width:430px;min-height:100vh;min-height:100dvh;margin:0 auto;background:var(--paper);overflow-x:hidden;box-shadow:0 0 40px rgba(20,30,60,.12)}
+.screen{display:none;min-height:100vh;min-height:100dvh;padding-bottom:110px}
+.screen.on{display:block}
+.hs{scrollbar-width:none}.hs::-webkit-scrollbar{display:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* home */
+.top{background:var(--sea);padding:calc(14px + env(safe-area-inset-top)) 16px 0}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{display:flex;align-items:baseline;gap:8px}
+.logo b{font-family:var(--disp);font-weight:800;font-size:30px;line-height:1}
+.logo i{font-family:var(--hand);font-style:normal;font-weight:700;font-size:20px;color:#B4262C}
+.round{width:44px;height:44px;border-radius:22px;border:2px solid var(--ink);background:var(--paper);display:flex;align-items:center;justify-content:center;padding:0;flex:none;text-decoration:none}
+.search{display:flex;align-items:center;gap:10px;height:48px;margin-top:12px;padding:0 16px;border-radius:24px;background:var(--paper);border:2px solid var(--ink);box-shadow:0 4px 0 var(--ink)}
+.search input{flex:1;min-width:0;border:0;outline:none;background:transparent;font-size:16px}
+.chips{display:flex;gap:8px;overflow-x:auto;margin:12px -16px 0;padding:4px 16px 8px}
+.chip{flex:none;display:flex;align-items:center;gap:6px;height:38px;padding:0 13px;border-radius:19px;border:2px solid var(--ink);background:var(--paper);font-size:14px;font-weight:600;white-space:nowrap}
+.chip.on{background:var(--ink);color:#fff}
+.sw{width:12px;height:12px;border-radius:3px;border:1.5px solid var(--ink);flex:none}
+.chip.on .sw{border-color:#fff}
+.mapwrap{background:var(--sea);overflow:hidden;position:relative}
+.stage{position:relative;width:390px;height:250px;margin:0 auto;transform-origin:top left}
+.stage svg{position:absolute;left:0;top:0}
+.lbl{position:absolute;padding:2px 7px;border-radius:6px;background:rgba(255,255,255,.92);font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;pointer-events:none;white-space:nowrap}
+.pin{position:absolute;padding:0;border:2px solid var(--ink);border-radius:4px;box-shadow:0 2px 4px rgba(20,30,60,.3);transition:transform .15s}
+.pin.on{box-shadow:0 0 0 4px #fff,0 6px 14px rgba(20,30,60,.35);z-index:5}
+.bubble{position:absolute;transform:translateX(-50%);z-index:6;padding:5px 10px;border-radius:8px;background:var(--ink);color:#fff;font-size:12px;font-weight:700;white-space:nowrap;pointer-events:none}
+.sheet{position:relative;margin-top:-4px;background:var(--paper);border-radius:26px 26px 0 0;box-shadow:0 -6px 24px rgba(20,30,60,.16);padding-top:10px}
+.handle{width:40px;height:5px;border-radius:3px;background:#C9CBD6;margin:0 auto}
+.sheethead{display:flex;align-items:baseline;justify-content:space-between;padding:10px 20px 4px}
+h2,.h2{margin:0;font-family:var(--disp);font-weight:800;font-size:22px}
+.meta{font-size:13px;font-weight:600;color:var(--muted)}
+.cards{display:flex;gap:14px;overflow-x:auto;padding:12px 20px 22px}
+.card{flex:none;width:150px;height:172px;padding:14px 12px 12px;border:0;border-radius:3px;box-shadow:0 6px 12px rgba(20,30,60,.16);display:flex;flex-direction:column;gap:6px;text-align:left}
+.card .n{font-size:14px;font-weight:700;line-height:1.2}
+.card .t{flex:1;font-family:var(--hand);font-size:21px;line-height:1.05;white-space:pre-line;overflow:hidden}
+.card .a{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.peek{margin:14px 20px 0;position:relative;padding:16px 18px 18px;border-radius:4px;transform:rotate(-1deg);box-shadow:0 8px 18px rgba(20,30,60,.18);display:flex;flex-direction:column;gap:8px}
+.peek .x{position:absolute;right:4px;top:4px;width:44px;height:44px;border:0;background:transparent;display:flex;align-items:center;justify-content:center}
+.big{font-family:var(--disp);font-weight:800;font-size:22px;line-height:1.1;padding-right:40px}
+.hand{font-family:var(--hand);font-size:26px;line-height:1.05;white-space:pre-line}
+.row{display:flex;gap:10px}
+.btn{flex:1;height:46px;border-radius:23px;border:2px solid var(--ink);background:var(--paper);display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;font-size:15px;text-decoration:none;color:var(--ink)}
+.btn.dark{background:var(--ink);color:#fff}
+.btn.red{background:var(--coral);color:#fff;box-shadow:0 3px 0 var(--ink)}
+nav.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:430px;height:calc(70px + env(safe-area-inset-bottom));padding:0 12px env(safe-area-inset-bottom);background:#fff;border-top:1.5px solid #E2E4EC;display:grid;grid-template-columns:repeat(5,1fr);align-items:center;z-index:20}
+.tab{height:56px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:600;color:var(--muted)}
+.tab.on{color:var(--ink);font-weight:700}
+.fab{width:62px;height:62px;margin:-30px auto 0;border-radius:31px;background:var(--coral);border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink);display:flex;align-items:center;justify-content:center;padding:0}
+/* spot */
+.hero{position:relative;height:250px;background:var(--sea);overflow:hidden}
+.herobar{position:absolute;left:0;right:0;top:calc(14px + env(safe-area-inset-top));padding:0 16px;display:flex;justify-content:space-between;z-index:3}
+.body{position:relative;margin-top:-28px;background:var(--paper);border-radius:26px 26px 0 0;padding:22px 20px 24px;display:flex;flex-direction:column;gap:22px}
+.tags{display:flex;gap:8px;flex-wrap:wrap}
+.tag{display:flex;align-items:center;height:28px;padding:0 11px;border-radius:14px;font-size:12px;font-weight:700;border:1.5px solid var(--ink)}
+h1{margin:0;font-family:var(--disp);font-weight:800;font-size:28px;line-height:1.08}
+.acts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.act{height:64px;border-radius:14px;border:2px solid var(--ink);background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:700;text-decoration:none;color:var(--ink)}
+.act.on{background:var(--ink);color:#fff}
+.sec{display:flex;flex-direction:column;gap:10px}
+.sechead{display:flex;align-items:baseline;justify-content:space-between}
+.photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.photos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;display:block}
+.empty{height:110px;border-radius:16px;border:2px dashed var(--ink);background:#EEF6FD;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:15px;font-weight:700;width:100%}
+.note{padding:16px 18px 12px;border-radius:4px;box-shadow:0 8px 16px rgba(20,30,60,.15);display:flex;flex-direction:column;gap:8px}
+.note .by{font-size:12px;font-weight:600}
+.note .hearts{font-size:18px}
+.note .pics{display:flex;gap:6px;flex-wrap:wrap}
+.note .pics img{width:64px;height:64px;object-fit:cover;border-radius:8px}
+.bottombar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:430px;padding:12px 20px calc(14px + env(safe-area-inset-bottom));background:#fff;border-top:1.5px solid #E2E4EC;display:flex;gap:10px;z-index:20}
+.bottombar .btn{height:52px;border-radius:26px;font-size:16px}
+/* forms */
+.formtop{display:flex;align-items:center;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top)) 16px 8px}
+.form{padding:8px 20px 24px;display:flex;flex-direction:column;gap:22px}
+.place{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;background:#EEF6FD}
+.place .n{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+label.h,.lh{font-family:var(--disp);font-weight:800;font-size:18px}
+.rates{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.rate{min-height:72px;padding:8px 6px;border-radius:14px;border:2px solid var(--ink);background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.rate.on{background:var(--ink);color:#fff}
+.rate span:first-child{font-size:20px;line-height:1}
+.rate span:last-child{font-size:12px;font-weight:700;line-height:1.2;text-align:center}
+.thumb{position:relative}
+.thumb button{position:absolute;right:3px;top:3px;width:30px;height:30px;border-radius:15px;border:0;background:var(--ink);display:flex;align-items:center;justify-content:center;padding:0}
+.addph{aspect-ratio:1;border-radius:12px;border:2px dashed var(--ink);background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:13px;font-weight:700}
+.field{height:48px;padding:0 14px;border-radius:12px;border:2px solid var(--ink);background:#fff;font-size:16px;width:100%}
+.sticky{padding:16px;border-radius:4px;transform:rotate(-1deg);box-shadow:0 8px 16px rgba(20,30,60,.15)}
+.sticky textarea{width:100%;border:0;outline:none;resize:none;background:transparent;font-family:var(--hand);font-size:26px;line-height:1.1}
+.swatch{width:34px;height:34px;border-radius:6px;border:2px solid var(--ink);padding:0}
+.swatch.on{box-shadow:0 0 0 3px var(--paper),0 0 0 5px var(--ink)}
+.pill{height:40px;padding:0 14px;border-radius:20px;border:2px solid var(--ink);background:var(--paper);font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
+.pill.on{background:var(--ink);color:#fff}
+.pill.on .sw{border-color:#fff}
+.hint{position:absolute;left:50%;transform:translateX(-50%);padding:6px 12px;border-radius:10px;background:var(--ink);color:#fff;font-size:13px;font-weight:700;white-space:nowrap;pointer-events:none}
+.newpin{position:absolute;width:30px;height:30px;border:3px dashed var(--ink);border-radius:5px;background:var(--paper);transform:rotate(-4deg);box-shadow:0 8px 16px rgba(20,30,60,.3);pointer-events:none}
+.err{color:#B4262C;font-size:13px;font-weight:700;min-height:16px}
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-weight:700;font-size:14px;z-index:50;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HOME -->
+<section class="screen on" id="home">
+<div class="top">
+<div class="brand">
+<div class="logo"><b>Hojiak Map</b><i>Singapore</i></div>
+<button class="round" id="resetBtn" aria-label="Reset demo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F2F57" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button>
+</div>
+<div class="search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F2F57" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><label for="q" class="sr">Search</label><input id="q" type="search" placeholder="Search a dish, spot or area" autocomplete="off"></div>
+<div class="chips hs" id="chips"></div>
+</div>
+<div class="mapwrap"><div class="stage" id="stage"></div></div>
+<div class="sheet"><div class="handle"></div><div id="sheetBody"></div></div>
+</section>
+
+<!-- SPOT -->
+<section class="screen" id="spot">
+<div class="hero" id="hero"></div>
+<div class="body" id="spotBody"></div>
+<div class="bottombar"><button class="btn" data-go="note">Write a note</button><button class="btn red" data-go="note" data-photo="1">Add photos</button></div>
+</section>
+
+<!-- NOTE -->
+<section class="screen" id="note">
+<div class="formtop"><button class="round" data-back aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F2F57" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div class="h2" style="font-size:20px">Your note</div><div style="width:44px"></div></div>
+<div class="form">
+<div class="place" id="notePlace"></div>
+<div class="sec"><div class="lh">How good was it?</div><div class="rates" id="rates"></div></div>
+<div class="sec"><div class="sechead"><div class="lh">Photos</div><span class="meta" id="phCount"></span></div><div class="photos" id="notePhotos"></div><input type="file" id="file" accept="image/*" multiple class="sr"></div>
+<div class="sec"><label class="h" for="dish">What did you order?</label><input class="field" id="dish" placeholder="e.g. Egg prata"></div>
+<div class="sec"><div class="sechead"><label class="h" for="noteText">Your sticky note</label><div class="row" style="gap:6px" id="noteSw"></div></div>
+<div class="sticky" id="noteSticky"><textarea id="noteText" rows="4" placeholder="Write it like you would on the wall…"></textarea></div><div class="err" id="noteErr"></div></div>
+</div>
+<div class="bottombar"><button class="btn red" id="postNote">Stick it</button></div>
+</section>
+
+<!-- ADD SPOT -->
+<section class="screen" id="add">
+<div class="formtop" style="background:var(--sea)"><button class="round" data-back aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F2F57" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div class="h2" style="font-size:19px;padding:6px 14px;border-radius:20px;background:var(--paper);border:2px solid var(--ink)">Stick a new spot</div><div style="width:44px"></div></div>
+<div class="mapwrap"><div class="stage" id="addStage"></div></div>
+<div class="sheet"><div class="form" style="padding-top:12px">
+<div class="row" style="align-items:center;gap:8px;font-size:14px;font-weight:600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F2F57" stroke-width="2.2" stroke-linecap="round"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg><span>Pinned in</span><span id="addArea" style="padding:3px 10px;border-radius:12px;background:#EEF6FD;font-weight:700">Tap the map</span></div>
+<div class="sec"><label class="h" for="spotName">Place name</label><input class="field" id="spotName" placeholder="e.g. Two Men Bagel House"></div>
+<div class="sec"><div class="lh">What kind of food?</div><div class="row" style="flex-wrap:wrap;gap:8px" id="addCats"></div></div>
+<div class="sec"><label class="h" for="spotNote">Your sticky note</label><div class="sticky" id="addSticky"><textarea id="spotNote" rows="3" placeholder="What should people order?"></textarea></div></div>
+<div class="sec"><div class="lh">Good to know</div><div class="row" style="flex-wrap:wrap;gap:8px" id="addTags"></div></div>
+<div class="err" id="addErr"></div>
+</div></div>
+<div class="bottombar"><button class="btn red" id="postSpot">Stick it on the map</button></div>
+</section>
+
+<nav class="tabs" id="tabs">
+<button class="tab on" data-tab="map"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Map</span></button>
+<button class="tab" data-tab="wall"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg><span>Wall</span></button>
+<div><button class="fab" data-go="add" aria-label="Stick a new spot"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button></div>
+<button class="tab" data-tab="saved"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span>Saved</span></button>
+<button class="tab" data-tab="me"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><span>Me</span></button>
+</nav>
+<div class="toast" id="toast"></div>
+</div>
+
+<script>
+(function(){
+const CATS={local:{label:'Local & Hawker',paper:'#F7E59A'},cafe:{label:'Café & Bakes',paper:'#DCD0F7'},global:{label:'Global Eats',paper:'#A9E5D3'},sweets:{label:'Desserts & Drinks',paper:'#F9C6CF'}};
+const WALL='From the Hojiak wall · Joo Chiat Rd · 4 Oct 2026';
+const SEED=[
+['citrus','Citrus by the Pool','Woodlands','global',190,235,'♡♡ Tomyum seafood pasta\n♡♡ Muslim friendly',['Muslim-friendly']],
+['hanka','Hanka… (Korean)','Woodlands','global',214,245,'Korean — Delicious!!',[]],
+['hakka','Hakka 客家菜','Jurong','local',62,338,'客家菜\n吃了感觉回国了',[]],
+['banhmi','Ba Bường Bánh Mì','Jurong','global',90,315,'Bánh mì',[]],
+['bakery','… Bakery','West','cafe',140,332,'Autumn Quiche is good.',[]],
+['overbro','Over Bro','West','global',118,352,'☆ Salmon 2\nShooting Star is delicious',[]],
+['chimi','Chimichanga','Holland Village','global',168,340,'Fish taco is good',[]],
+['oatsome','Oatsome','Central','sweets',198,350,'Oatsome.',[]],
+['btk','Boon Tong Kee 文东记','Balestier','local',226,326,'强烈推荐\n文东记!!!',[]],
+['maxi','Maxi Coffee Bar','Bugis','cafe',252,336,'PEACH TOAST!!!\nEvery month, it has a different menu.\nPeach Toast is good!',[]],
+['lemak','… Lemak','Fortune Centre','local',240,354,'@ Fortune Centre',[]],
+['songfa','Song Fa Bak Kut Teh 松发肉骨茶','Chinatown','local',220,368,'松发 肉骨茶',[]],
+['mohgan','Mr & Mrs Mohgan’s Super Crispy Roti Prata','Joo Chiat','local',312,322,'Best Prata!\n↓ Mr. & Mrs. Mohgan.',[]],
+['twomen','Two Men Bagel House','Katong','cafe',336,330,'♡ Blueberry',[]],
+['bored','Bored Taco','Katong','global',296,342,'☆ Birria Taco\nBeef Chilli Taco',[]]
+].map(a=>({id:a[0],name:a[1],area:a[2],cat:a[3],x:a[4],y:a[5],tags:a[7],notes:[{text:a[6],by:WALL,color:CATS[a[3]].paper,hearts:0,photos:[],dish:''}],seed:true}));
+const LABELS=[['Woodlands',150,258],['Sembawang',238,230],['Choa Chu Kang',95,278],['Jurong',30,360],['Orchard',148,304],['Pasir Ris',318,268],['Changi',334,300],['Katong / Joo Chiat',262,366],['Southern Islands',172,414]];
+const AREAS=[['Woodlands',195,235],['Sembawang',250,235],['Choa Chu Kang',120,285],['Jurong',70,330],['West',130,345],['Orchard',190,320],['Balestier',228,318],['Bugis',250,345],['Chinatown',222,370],['Pasir Ris',340,280],['Changi',365,300],['Katong / Joo Chiat',315,335],['Sentosa',222,401]];
+const TILTS=[-4,3,-2,5,-3,2,-5,4,-1,3,-4,2,-3,5,-2];
+const OY=190;
+const ISLAND='<svg width="390" height="250" viewBox="0 190 390 250" aria-hidden="true"><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"><path d="M28 214 q6 -6 12 0 q6 6 12 0"/><path d="M300 200 q6 -6 12 0 q6 6 12 0"/><path d="M40 420 q6 -6 12 0 q6 6 12 0"/><path d="M300 415 q6 -6 12 0 q6 6 12 0"/><path d="M130 430 q6 -6 12 0 q6 6 12 0"/></g><ellipse cx="80" cy="393" rx="24" ry="9" fill="#A8D98A" stroke="#F4E7C2" stroke-width="5"/><ellipse cx="222" cy="401" rx="17" ry="6" fill="#A8D98A" stroke="#F4E7C2" stroke-width="5"/><ellipse cx="338" cy="232" rx="20" ry="6" fill="#A8D98A" stroke="#F4E7C2" stroke-width="5"/><path id="isl" d="M13 345 C30 320 50 300 60 290 L85 255 C100 245 115 240 145 225 L170 217 C182 214 190 212 195 213 C205 214 212 220 220 220 C232 218 240 215 245 217 C252 222 256 228 260 230 L280 245 C290 249 298 250 305 250 L325 257 L345 265 C355 270 362 276 365 280 L380 290 C385 297 386 304 383 310 C380 318 378 322 375 325 L350 335 L325 345 L300 353 C290 358 282 362 275 365 L255 380 C248 384 242 387 237 387 C230 387 225 385 220 383 L200 375 C190 375 182 377 175 377 L145 373 L115 370 L85 373 C75 372 68 368 60 365 L35 360 C25 357 18 352 13 345 Z" fill="#A8D98A" stroke="#F4E7C2" stroke-width="9" stroke-linejoin="round"/><ellipse cx="196" cy="282" rx="20" ry="10" fill="#7CC3F2"/><g fill="none" stroke="#FFF6DA" stroke-width="3" stroke-linecap="round"><path d="M40 340 C110 318 170 330 230 318 C280 308 330 300 372 300"/><path d="M200 220 C206 260 214 300 222 378"/><path d="M95 262 C120 290 150 300 175 345"/></g><g fill="#86C46A"><circle cx="120" cy="290" r="4"/><circle cx="152" cy="262" r="4"/><circle cx="270" cy="268" r="4"/><circle cx="300" cy="275" r="4"/><circle cx="70" cy="320" r="4"/><circle cx="250" cy="295" r="3"/><circle cx="355" cy="306" r="4"/><circle cx="140" cy="355" r="3"/></g></svg>';
+
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $=id=>document.getElementById(id);
+let places=SEED.slice();
+let st={cat:'all',sel:null,q:'',cur:null,hist:['home'],rate:2,noteColor:'#F9C6CF',draft:[],addCat:'local',addTags:{},addPin:null,saved:{}};
+const KEY='hojiak-demo-v1';
+function save(){try{localStorage.setItem(KEY,JSON.stringify({extra:places.filter(p=>!p.seed),seedNotes:places.filter(p=>p.seed).map(p=>p.notes.slice(1)),saved:st.saved}))}catch(e){toast('Saved for this visit only')}}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(!d)return;places.forEach((p,i)=>{if(d.seedNotes&&d.seedNotes[i])p.notes=p.notes.concat(d.seedNotes[i])});places=places.concat(d.extra||[]);st.saved=d.saved||{}}catch(e){}}
+load();
+function toast(t){const el=$('toast');el.textContent=t;el.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove('on'),1800)}
+function fit(){const w=Math.min(document.querySelector('.app').clientWidth,430);const s=Math.min(1.1,w/390);document.querySelectorAll('.stage').forEach(el=>{el.style.transform='scale('+s+')';el.style.margin='0';el.style.marginLeft=((w-390*s)/2)+'px';el.parentNode.style.height=(250*s)+'px'})}
+window.addEventListener('resize',fit);
+
+function shown(){const q=st.q.trim().toLowerCase();return places.filter(p=>(st.cat==='all'||p.cat===st.cat)&&(!q||(p.name+' '+p.area+' '+p.notes.map(n=>n.text+' '+n.dish).join(' ')).toLowerCase().includes(q)))}
+function renderHome(){
+  const chips=[{id:'all',label:'All spots',paper:'#fff'}].concat(Object.keys(CATS).map(k=>({id:k,label:CATS[k].label,paper:CATS[k].paper})));
+  $('chips').innerHTML=chips.map(c=>'<button class="chip'+(c.id===st.cat?' on':'')+'" data-cat="'+c.id+'"><span class="sw" style="background:'+c.paper+'"></span>'+esc(c.label)+'<span style="opacity:.8;font-weight:500">'+(c.id==='all'?places.length:places.filter(p=>p.cat===c.id).length)+'</span></button>').join('');
+  const list=shown();
+  if(st.sel&&!list.find(p=>p.id===st.sel))st.sel=null;
+  let h=ISLAND+LABELS.map(l=>'<div class="lbl" style="left:'+l[1]+'px;top:'+(l[2]-OY)+'px">'+esc(l[0])+'</div>').join('');
+  list.forEach((p,i)=>{const on=p.id===st.sel,s=on?30:20;h+='<button class="pin'+(on?' on':'')+'" data-pin="'+p.id+'" aria-label="'+esc(p.name)+'" style="left:'+(p.x-s/2)+'px;top:'+(p.y-OY-s/2)+'px;width:'+s+'px;height:'+s+'px;background:'+CATS[p.cat].paper+';transform:rotate('+(on?0:TILTS[places.indexOf(p)%15])+'deg)"></button>'});
+  const sel=places.find(p=>p.id===st.sel);
+  if(sel)h+='<div class="bubble" style="left:'+sel.x+'px;top:'+(sel.y-OY-50)+'px">'+esc(sel.name)+'</div>';
+  $('stage').innerHTML=h;
+  if(sel){
+    $('sheetBody').innerHTML='<div class="peek" style="background:'+CATS[sel.cat].paper+'"><button class="x" data-close aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F2F57" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div class="big">'+esc(sel.name)+'</div><div style="font-size:13px;font-weight:600">'+esc(sel.area)+' · '+CATS[sel.cat].label+' · '+sel.notes.length+(sel.notes.length===1?' note':' notes')+'</div><div class="hand">'+esc(sel.notes[sel.notes.length-1].text)+'</div><div class="row" style="margin-top:6px"><button class="btn dark" data-open="'+sel.id+'">Open spot</button><a class="btn" target="_blank" rel="noopener" href="'+dir(sel)+'">Directions</a></div></div><div style="height:24px"></div>';
+  } else {
+    $('sheetBody').innerHTML='<div class="sheethead"><h2>On the wall</h2><span class="meta">'+list.length+(list.length===1?' spot':' spots')+' · tap a note</span></div>'+(list.length?'<div class="cards hs">'+list.map(p=>{const n=p.notes[p.notes.length-1];return '<button class="card" data-pick="'+p.id+'" style="background:'+CATS[p.cat].paper+';transform:rotate('+(TILTS[places.indexOf(p)%15]/2)+'deg)"><span class="n">'+esc(p.name)+'</span><span class="t">'+esc(n.text)+'</span><span class="a">'+esc(p.area)+'</span></button>'}).join('')+'</div>':'<p style="padding:8px 20px 24px;margin:0;font-weight:600">Nothing here yet — tap + to stick the first one.</p>');
+  }
+}
+function dir(p){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(p.name.replace(/…/g,'')+' '+p.area+' Singapore')}
+
+function renderSpot(){
+  const p=places.find(x=>x.id===st.cur);if(!p)return;
+  $('hero').innerHTML='<div style="position:absolute;width:390px;height:250px;left:calc(50% - '+p.x+'px);top:calc(50% - '+(p.y-OY-20)+'px);transform-origin:'+p.x+'px '+(p.y-OY)+'px;transform:scale(2.6)">'+ISLAND+'<div style="position:absolute;left:'+(p.x-6)+'px;top:'+(p.y-OY-6)+'px;width:12px;height:12px;border:1px solid #1F2F57;border-radius:2px;background:'+CATS[p.cat].paper+';box-shadow:0 0 0 2px #fff"></div></div><div class="herobar"><button class="round" data-back aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F2F57" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><button class="round" data-share aria-label="Share"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F2F57" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M7 8l5-5 5 5"/><path d="M5 13v7h14v-7"/></svg></button></div>';
+  const photos=[].concat(...p.notes.map(n=>n.photos||[]));
+  const dishes=[...new Set(p.notes.map(n=>n.dish).filter(Boolean))];
+  const saved=!!st.saved[p.id];
+  $('spotBody').innerHTML='<div style="display:flex;flex-direction:column;gap:8px"><div class="tags"><span class="tag" style="background:'+CATS[p.cat].paper+';border-color:transparent">'+CATS[p.cat].label+'</span><span class="tag">'+esc(p.area)+'</span>'+p.tags.map(t=>'<span class="tag">'+esc(t)+'</span>').join('')+'</div><h1>'+esc(p.name)+'</h1></div>'+
+  '<div class="acts"><a class="act" target="_blank" rel="noopener" href="'+dir(p)+'"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"/></svg>Directions</a><button class="act'+(saved?' on':'')+'" data-save><svg width="20" height="20" viewBox="0 0 24 24" fill="'+(saved?'currentColor':'none')+'" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>'+(saved?'Saved':'Save')+'</button><button class="act" data-go="note"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>Note</button><button class="act" data-go="note" data-photo="1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Photo</button></div>'+
+  (dishes.length?'<div class="sec"><h2 style="font-size:20px">Must-try</h2><div class="tags">'+dishes.map(d=>'<span class="tag" style="background:#1F2F57;color:#fff;height:34px;padding:0 14px;font-size:14px">'+esc(d)+'</span>').join('')+'</div></div>':'')+
+  '<div class="sec"><div class="sechead"><h2 style="font-size:20px">Photos</h2><span class="meta">'+photos.length+(photos.length===1?' photo':' photos')+'</span></div>'+(photos.length?'<div class="photos">'+photos.map(u=>'<img src="'+u+'" alt="Food photo">').join('')+'</div>':'<button class="empty" data-go="note" data-photo="1"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1F2F57" stroke-width="2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Be the first to share a photo</button>')+'</div>'+
+  '<div class="sec"><div class="sechead"><h2 style="font-size:20px">Notes</h2><span class="meta">'+p.notes.length+(p.notes.length===1?' note':' notes')+'</span></div>'+p.notes.slice().reverse().map((n,i)=>'<div class="note" style="background:'+n.color+';transform:rotate('+(i%2?1:-1.5)+'deg)">'+(n.hearts?'<div class="hearts">'+'♡'.repeat(n.hearts)+'</div>':'')+'<div class="hand" style="font-size:28px">'+esc(n.text)+'</div>'+(n.dish?'<div style="font-weight:700;font-size:14px">Ordered: '+esc(n.dish)+'</div>':'')+(n.photos&&n.photos.length?'<div class="pics">'+n.photos.map(u=>'<img src="'+u+'" alt="Food photo">').join('')+'</div>':'')+'<div class="by">'+esc(n.by)+'</div></div>').join('')+'</div>';
+}
+
+const RATES=[[1,'♡','Good'],[2,'♡♡','Must go'],[3,'♡♡♡','Worth crossing the island']];
+const NCOL=['#F7E59A','#F9C6CF','#DCD0F7','#A9E5D3'];
+function renderNote(){
+  const p=places.find(x=>x.id===st.cur);
+  $('notePlace').innerHTML='<div style="flex:none;width:26px;height:26px;border-radius:4px;background:'+CATS[p.cat].paper+';border:2px solid #1F2F57;transform:rotate(-4deg)"></div><div style="display:flex;flex-direction:column;gap:2px;min-width:0"><div class="n">'+esc(p.name)+'</div><div class="meta" style="font-size:12px">'+esc(p.area)+' · '+CATS[p.cat].label+'</div></div>';
+  $('rates').innerHTML=RATES.map(r=>'<button class="rate'+(r[0]===st.rate?' on':'')+'" data-rate="'+r[0]+'" aria-pressed="'+(r[0]===st.rate)+'"><span>'+r[1]+'</span><span>'+r[2]+'</span></button>').join('');
+  $('phCount').textContent=st.draft.length+' of 9';
+  $('notePhotos').innerHTML=st.draft.map((u,i)=>'<div class="thumb"><img src="'+u+'" alt="Your photo"><button data-rm="'+i+'" aria-label="Remove photo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>').join('')+(st.draft.length<9?'<label for="file" class="addph"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F2F57" stroke-width="2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Add</label>':'');
+  $('noteSw').innerHTML=NCOL.map(c=>'<button class="swatch'+(c===st.noteColor?' on':'')+'" data-col="'+c+'" style="background:'+c+'" aria-label="Note colour"></button>').join('');
+  $('noteSticky').style.background=st.noteColor;
+}
+function renderAdd(){
+  let h=ISLAND+LABELS.map(l=>'<div class="lbl" style="left:'+l[1]+'px;top:'+(l[2]-OY)+'px">'+esc(l[0])+'</div>').join('');
+  places.forEach(p=>{h+='<div class="pin" style="left:'+(p.x-7)+'px;top:'+(p.y-OY-7)+'px;width:14px;height:14px;opacity:.55;background:'+CATS[p.cat].paper+'"></div>'});
+  if(st.addPin)h+='<div class="newpin" style="left:'+(st.addPin.x-15)+'px;top:'+(st.addPin.y-OY-15)+'px;background:'+CATS[st.addCat].paper+'"></div>';
+  else h+='<div class="hint" style="top:12px">Tap the island to place your note</div>';
+  $('addStage').innerHTML=h;
+  $('addArea').textContent=st.addPin?st.addPin.area:'Tap the map';
+  $('addCats').innerHTML=Object.keys(CATS).map(k=>'<button class="pill'+(k===st.addCat?' on':'')+'" data-acat="'+k+'"><span class="sw" style="background:'+CATS[k].paper+'"></span>'+CATS[k].label+'</button>').join('');
+  $('addTags').innerHTML=['Muslim-friendly','Vegetarian options','Open late'].map(t=>'<button class="pill'+(st.addTags[t]?' on':'')+'" data-atag="'+t+'">'+t+'</button>').join('');
+  $('addSticky').style.background=CATS[st.addCat].paper;
+}
+
+function show(id,push){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));
+  $('tabs').style.display=id==='home'?'grid':'none';
+  if(push!==false)st.hist.push(id);
+  if(id==='home')renderHome();if(id==='spot')renderSpot();if(id==='note')renderNote();if(id==='add')renderAdd();
+  fit();window.scrollTo(0,0);
+}
+function back(){st.hist.pop();const prev=st.hist[st.hist.length-1]||'home';if(!st.hist.length)st.hist=['home'];show(prev,false)}
+
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button,[data-close]');if(!t)return;
+  const d=t.dataset;
+  if(d.cat){st.cat=d.cat;st.sel=null;renderHome()}
+  else if(d.pin){st.sel=st.sel===d.pin?null:d.pin;renderHome()}
+  else if(d.pick){st.sel=d.pick;renderHome();window.scrollTo({top:0,behavior:'smooth'})}
+  else if('close' in d){st.sel=null;renderHome()}
+  else if(d.open){st.cur=d.open;show('spot')}
+  else if('back' in d){back()}
+  else if(d.go){if(d.go==='note'){st.rate=2;st.draft=[];$('noteText').value='';$('dish').value='';$('noteErr').textContent='';st.noteColor=CATS[places.find(x=>x.id===st.cur).cat].paper}
+    if(d.go==='add'){st.addPin=null;st.addCat='local';st.addTags={};$('spotName').value='';$('spotNote').value='';$('addErr').textContent=''}
+    show(d.go);if(d.photo)setTimeout(()=>$('file').click(),50)}
+  else if(d.rate){st.rate=+d.rate;renderNote()}
+  else if(d.col){st.noteColor=d.col;renderNote()}
+  else if(d.rm){st.draft.splice(+d.rm,1);renderNote()}
+  else if(d.acat){st.addCat=d.acat;renderAdd()}
+  else if(d.atag){st.addTags[d.atag]=!st.addTags[d.atag];renderAdd()}
+  else if('save' in d){st.saved[st.cur]=!st.saved[st.cur];save();renderSpot();toast(st.saved[st.cur]?'Saved':'Removed from saved')}
+  else if('share' in d){const u=location.href;if(navigator.share)navigator.share({title:'Hojiak Map',url:u}).catch(()=>{});else{try{navigator.clipboard.writeText(u);toast('Link copied')}catch(err){}}}
+  else if(d.tab){if(d.tab==='map'){window.scrollTo({top:0,behavior:'smooth'})}else if(d.tab==='me'){}else toast('Coming soon')}
+});
+$('resetBtn').addEventListener('click',()=>{if(confirm('Reset the demo? Your added spots and notes on this phone will be cleared.')){try{localStorage.removeItem(KEY)}catch(e){}location.reload()}});
+$('q').addEventListener('input',e=>{st.q=e.target.value;st.sel=null;renderHome()});
+$('addStage').addEventListener('click',e=>{
+  const r=$('addStage').getBoundingClientRect();const s=r.width/390;const x=(e.clientX-r.left)/s,y=(e.clientY-r.top)/s+OY;
+  const path=document.querySelector('#addStage #isl');let inside=true;
+  try{const pt=path.ownerSVGElement.createSVGPoint();pt.x=x;pt.y=y;inside=path.isPointInFill(pt)}catch(err){}
+  if(!inside){toast('Tap on the island');return}
+  let best=AREAS[0],bd=1e9;AREAS.forEach(a=>{const dd=(a[1]-x)**2+(a[2]-y)**2;if(dd<bd){bd=dd;best=a}});
+  st.addPin={x:Math.round(x),y:Math.round(y),area:best[0]};renderAdd();
+});
+$('file').addEventListener('change',e=>{
+  const fs=[...e.target.files].slice(0,9-st.draft.length);e.target.value='';
+  fs.forEach(f=>{const img=new Image();const url=URL.createObjectURL(f);img.onload=()=>{const m=900,k=Math.min(1,m/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=img.width*k;c.height=img.height*k;c.getContext('2d').drawImage(img,0,0,c.width,c.height);st.draft.push(c.toDataURL('image/jpeg',0.78));URL.revokeObjectURL(url);if(document.getElementById('note').classList.contains('on'))renderNote()};img.src=url});
+});
+$('postNote').addEventListener('click',()=>{
+  const text=$('noteText').value.trim();
+  if(!text&&!st.draft.length){$('noteErr').textContent='Write a few words or add a photo first.';return}
+  const p=places.find(x=>x.id===st.cur);
+  p.notes.push({text:text||'♡'.repeat(st.rate),by:'You · just now',color:st.noteColor,hearts:st.rate,photos:st.draft.slice(),dish:$('dish').value.trim()});
+  save();back();toast('Stuck on the map!');
+});
+$('postSpot').addEventListener('click',()=>{
+  const name=$('spotName').value.trim(),text=$('spotNote').value.trim();
+  if(!st.addPin){$('addErr').textContent='Tap the map to place your spot.';return}
+  if(!name){$('addErr').textContent='Give the place a name.';return}
+  const id='u'+Date.now();
+  places.push({id,name,area:st.addPin.area,cat:st.addCat,x:st.addPin.x,y:st.addPin.y,tags:Object.keys(st.addTags).filter(k=>st.addTags[k]),notes:[{text:text||name,by:'You · just now',color:CATS[st.addCat].paper,hearts:0,photos:[],dish:''}]});
+  save();st.cat='all';st.sel=id;st.hist=['home'];show('home',false);toast('Stuck on the map!');
+});
+renderHome();fit();
+})();
+</script>
+</body>
+</html>
